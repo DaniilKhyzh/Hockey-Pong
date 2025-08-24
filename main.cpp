@@ -1,15 +1,158 @@
-// not my code, it's for testing Makefile
-
 #include "raylib.h"
 
-int main(void)
+int screenWidth = 1200;
+int screenHeight = 700;
+
+class Ball
 {
-    InitWindow(800, 600, "raylib works!");
+public:
+    int width_x;
+    int height_y;
+    int radius;
+    int speed_x;
+    int speed_y;
+
+    void DrawBall()
+    {
+        DrawCircle(width_x, height_y, radius, BLACK);
+    }
+
+    void MoveBall()
+    {
+        height_y -= speed_y;
+        width_x -= speed_x;
+        if (height_y - radius <= 0 || height_y + radius >= screenHeight)
+        {
+            speed_y *= -1;
+        }
+    }
+};
+
+Ball ball; // making ball global
+
+class Player
+{
+public:
+    int width;
+    int height;
+    int speed;
+    int y;
+
+    void DrawPlayer()
+    {
+        DrawRectangle(screenWidth - width - 10, y, width, height, RED);
+    }
+
+    void MovePlayer()
+    {
+        if (IsKeyDown(KEY_UP) && y != 0)
+        {
+            y -= speed;
+        }
+        if (IsKeyDown(KEY_DOWN) && y != screenHeight - height)
+        {
+            y += speed;
+        }
+    }
+};
+
+class CPU
+{
+public:
+    int cpu_x;
+    int cpu_y;
+    int width;
+    int height;
+    int speed;
+
+    void cpuDraw()
+    {
+        DrawRectangle(cpu_x, cpu_y, width, height, BLUE);
+    }
+
+    void Move()
+    {
+        if (ball.height_y >= cpu_y + (height / 2) && cpu_y != screenHeight - height)
+        {
+            cpu_y += speed;
+        }
+        if (ball.height_y <= cpu_y + (height / 2) && cpu_y != 0)
+        {
+            cpu_y -= speed;
+        }
+    }
+};
+
+int main()
+{
+
+    InitWindow(screenWidth, screenHeight, "Hockey Pong");
+    SetTargetFPS(60);
+    // score
+    int player_score = 0;
+    int cpu_score = 0;
+
+    // ball parameters
+    ball.width_x = screenWidth / 2;
+    ball.height_y = screenHeight / 2;
+    ball.radius = 15;
+    ball.speed_x = 5;
+    ball.speed_y = 5;
+
+    // player parameters
+    Player player;
+    player.width = 20;
+    player.height = 100;
+    player.y = (screenHeight / 2) - (player.height / 2);
+    player.speed = 4;
+
+    // CPU parameters
+    CPU cpu;
+    cpu.cpu_x = 10;
+    cpu.cpu_y = (screenHeight / 2) - (player.height / 2);
+    cpu.width = 20;
+    cpu.height = 100;
+    cpu.speed = 4;
+
     while (!WindowShouldClose())
     {
+        // Event
+        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(screenWidth - player.width - 10), float(player.y), float(player.width), float(player.height)}))
+        {
+            ball.speed_x *= -1;
+        }
+        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(cpu.cpu_x), float(cpu.cpu_y), float(cpu.width), float(cpu.height)}))
+        {
+            ball.speed_x *= -1;
+        }
+
+        // Goal check
+        if (ball.width_x - ball.radius == 0)
+        {
+            player_score += 1;
+            ball.width_x = screenWidth / 2;
+            ball.height_y = screenHeight / 2;
+        }
+        else if (ball.width_x + ball.radius == screenWidth)
+        {
+            cpu_score += 1;
+            ball.width_x = screenWidth / 2;
+            ball.height_y = screenHeight / 2;
+        }
+
+        // Movement
+        ball.MoveBall();
+        player.MovePlayer();
+        cpu.Move();
+        // Drawing
         BeginDrawing();
-        ClearBackground(RAYWHITE);
-        DrawText("Hello, raylib!", 190, 200, 20, LIGHTGRAY);
+        ClearBackground(WHITE);
+        DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, BLACK);
+        DrawText(TextFormat("%i", cpu_score), screenWidth / 4, 10, 100, BLUE);
+        DrawText(TextFormat("%i", player_score), 3 * screenWidth / 4, 10, 100, RED);
+        ball.DrawBall();
+        player.DrawPlayer();
+        cpu.cpuDraw();
         EndDrawing();
     }
     CloseWindow();
