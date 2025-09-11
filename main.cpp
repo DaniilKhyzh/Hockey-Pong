@@ -16,65 +16,64 @@ int main()
     ball.radius = 15;
     ball.speed_x = 5;
     ball.speed_y = 5;
+    ball.acceleration = 1.5;
 
-    // player parameters
-    Player player;
-    player.width = 20;
-    player.height = 100;
-    player.y = (screenHeight / 2) - (player.height / 2);
-    player.speed = 7;
+    // player1 parameters
+    Player player1;
+    player1.width = 20;
+    player1.height = 100;
+    player1.y = (screenHeight / 2) - (player1.height / 2);
+    player1.speed = 7;
 
+    // player1 parameters
+    //  player2 parameters
+    Player2 player2;
+    player2.width = 20;
+    player2.height = 100;
+    player2.y = (screenHeight / 2) - (player2.height / 2);
+    player2.speed = 7;
     // CPU parameters
-    CPU cpu;
+    /* CPU cpu;
     cpu.cpu_x = 10;
     cpu.cpu_y = (screenHeight / 2) - (player.height / 2);
     cpu.width = 20;
     cpu.height = 100;
-    cpu.speed = 7;
+    cpu.speed = 7; */
 
     while (!WindowShouldClose())
     {
         // Event
-        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(screenWidth - player.width - 10), float(player.y), float(player.width), float(player.height)}) && !IsKeyDown(KEY_LEFT))
+        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(screenWidth - player1.width - 10), float(player1.y), float(player1.width), float(player1.height)}) && !IsKeyDown(KEY_LEFT))
         {
             ball.speed_x *= -1;
         }
-        // Powershot
-        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(screenWidth - player.width - 10), float(player.y), float(player.width), float(player.height)}) && IsKeyDown(KEY_LEFT))
+        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(10), float(player2.y), float(player2.width), float(player2.height)}) && !IsKeyDown(KEY_D))
         {
-            ball.speed_x *= -2;
+            ball.speed_x *= -1;
+        }
+        // Powershot 1
+        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(screenWidth - player1.width - 10), float(player1.y), float(player1.width), float(player1.height)}) && IsKeyDown(KEY_LEFT))
+        {
+            ball.speed_x += ball.acceleration;
+            ball.speed_x *= -1;
             if (ball.speed_y > 4)
             {
-                ball.speed_y += 4;
-            }
-            else if (ball.speed_y > 6 || ball.speed_y < -6)
-            {
-                ball.speed_y *= 2;
-            }
-            else
-            {
-                ball.speed_y -= 4;
+                ball.speed_y += ball.acceleration;
+                player1.speed += ball.acceleration;
+                player2.speed += ball.acceleration;
             }
         }
 
-        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(cpu.cpu_x), float(cpu.cpu_y), float(cpu.width), float(cpu.height)}))
+        // Powershot 2
+        if (CheckCollisionCircleRec({float(ball.width_x), float(ball.height_y)}, float(ball.radius), {float(10), float(player2.y), float(player2.width), float(player2.height)}) && IsKeyDown(KEY_D))
         {
-            if (ball.speed_x < -5) // if powershot was saved
+            ball.speed_x += ball.acceleration;
+            ball.speed_x *= -1;
+            if (ball.speed_y > 4)
             {
-                ball.speed_x -= 2;
-            }
-            else
-            {
-                ball.speed_x *= -1;
-            }
-
-            if (ball.speed_y > 5)
-            {
-                ball.speed_y -= 2;
-            }
-            else if (ball.speed_y < -5)
-            {
-                ball.speed_y += 2;
+                ball.speed_y += ball.acceleration;
+                player1.speed += ball.acceleration;
+                player2.speed += ball.acceleration;
             }
         }
 
@@ -82,6 +81,8 @@ int main()
         if (ball.width_x - ball.radius <= 0)
         {
             player_score += 1;
+            player1.speed = 7;
+            player2.speed = 7;
             ball.speed_y = 5;
             ball.speed_x = 5;
             ball.goal();
@@ -89,6 +90,8 @@ int main()
         else if (ball.width_x + ball.radius >= screenWidth)
         {
             cpu_score += 1;
+            player1.speed = 7;
+            player2.speed = 7;
             ball.speed_y = 5;
             ball.speed_x = 5;
             ball.goal();
@@ -96,8 +99,9 @@ int main()
 
         // Movement
         ball.MoveBall();
-        player.MovePlayer();
-        cpu.Move();
+        player1.MovePlayer();
+        player2.MovePlayer();
+
         // Drawing
         BeginDrawing();
         ClearBackground(WHITE);
@@ -131,8 +135,8 @@ int main()
         DrawText(TextFormat("%i", cpu_score), screenWidth / 4, 10, 100, BLUE);
         DrawText(TextFormat("%i", player_score), 3 * screenWidth / 4, 10, 100, RED);
         ball.DrawBall();
-        player.DrawPlayer();
-        cpu.cpuDraw();
+        player1.DrawPlayer();
+        player2.DrawPlayer();
         EndDrawing();
     }
     CloseWindow();

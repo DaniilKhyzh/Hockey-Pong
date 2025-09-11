@@ -1,16 +1,17 @@
 #include "raylib.h"
 
-int screenWidth = 1200;
-int screenHeight = 700;
+float screenWidth = 1200.0;
+float screenHeight = 700.0;
 
 class Ball
 {
 public:
-    int width_x;
-    int height_y;
-    int radius;
-    int speed_x;
-    int speed_y;
+    float width_x;
+    float height_y;
+    float radius;
+    float speed_x;
+    float speed_y;
+    float acceleration;
 
     void DrawBall()
     {
@@ -21,8 +22,9 @@ public:
     {
         height_y -= speed_y;
         width_x -= speed_x;
-        if (height_y - radius <= 0 || height_y + radius >= screenHeight)
+        if (height_y - radius + 1 <= 1 || height_y + radius >= screenHeight)
         {
+            height_y = 3;
             speed_y *= -1;
         }
     }
@@ -42,10 +44,10 @@ Ball ball;
 class Player
 {
 public:
-    int width;
-    int height;
-    int speed;
-    int y;
+    float width;
+    float height;
+    float speed;
+    float y;
 
     void DrawPlayer()
     {
@@ -65,7 +67,7 @@ public:
     }
 };
 
-class CPU
+/* class CPU
 {
 public:
     int cpu_x;
@@ -88,6 +90,32 @@ public:
         if (ball.height_y <= cpu_y + (height / 2) && cpu_y >= 0)
         {
             cpu_y -= speed;
+        }
+    }
+}; */
+
+class Player2
+{
+public:
+    float width;
+    float height;
+    float speed;
+    float y;
+
+    void DrawPlayer()
+    {
+        DrawRectangleRounded(Rectangle{float(10), float(y), float(width), float(height)}, 5.0f, 4, BLUE);
+    }
+
+    void MovePlayer()
+    {
+        if (IsKeyDown(KEY_W) && y >= 0)
+        {
+            y -= speed;
+        }
+        if (IsKeyDown(KEY_S) && y <= screenHeight - height)
+        {
+            y += speed;
         }
     }
 };
